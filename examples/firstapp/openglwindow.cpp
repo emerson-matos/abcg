@@ -7,19 +7,19 @@ struct EstadoLinha {
   char* colA = NULL;
   char* colB = NULL;
   char* colC = NULL;
-  bool full = false;
 };
 
 char PLAYER_X{'X'};
 char PLAYER_0{'0'};
 
 char* player{&PLAYER_X};
-EstadoLinha* linha1 = (EstadoLinha*)malloc(sizeof(EstadoLinha));
-EstadoLinha* linha2 = (EstadoLinha*)malloc(sizeof(EstadoLinha));
-EstadoLinha* linha3 = (EstadoLinha*)malloc(sizeof(EstadoLinha));
+static EstadoLinha* linha1 = (EstadoLinha*)malloc(sizeof(EstadoLinha));
+static EstadoLinha* linha2 = (EstadoLinha*)malloc(sizeof(EstadoLinha));
+static EstadoLinha* linha3 = (EstadoLinha*)malloc(sizeof(EstadoLinha));
 static bool ENDGAME = false;
+
 void iniciaLinha(EstadoLinha* linha);
-void criaButton(int h, char* texto);
+void criaButton(int h, char** texto);
 void restartButton(int h);
 void trocaPlayer();
 void limpaLinha(EstadoLinha* linha);
@@ -66,9 +66,6 @@ void OpenGLWindow::paintUI() {
       // Static text
       ImGui::Text("Vez do jogador %c\n", *player);
     } else {
-      if (!ENDGAME) {
-        trocaPlayer();
-      }
       ENDGAME = true;
       char ganhador = pickWinner();
       if (ganhador == ' ') {
@@ -76,7 +73,6 @@ void OpenGLWindow::paintUI() {
       } else {
         ImGui::Text("Fim de jogo o jogador %c ganhou!", ganhador);
       }
-
     }
     drawButtons(h, linha1, linha2, linha3);
     restartButton(alturaAtual - h - 10);
@@ -131,40 +127,54 @@ void iniciaLinha(EstadoLinha* linha) {
   if (linha->colA == NULL) {
     linha->colA = (char*)malloc(sizeof(char*));
     *(linha->colA) = '\0';
+    std::printf("batata A\n\n");
   }
   if (linha->colB == NULL) {
     linha->colB = (char*)malloc(sizeof(char*));
     *(linha->colB) = '\0';
+    std::printf("batata B\n\n");
   }
   if (linha->colC == NULL) {
     linha->colC = (char*)malloc(sizeof(char*));
     *(linha->colC) = '\0';
   }
-  linha->full = false;
 }
+
 void drawButtons(int h, EstadoLinha* a, EstadoLinha* b, EstadoLinha* c) {
   drawThreeButtons((h / 3), a);
   drawThreeButtons((h / 3), b);
   drawThreeButtons((h / 3), c);
 }
-
+int count = 0;
 void drawThreeButtons(int h, EstadoLinha* linha) {
   ImGui::Columns(3, NULL, true);
-  criaButton(h, linha->colA);
-  criaButton(h, linha->colB);
-  criaButton(h, linha->colC);
+  if (count > 100000) {
+    std::printf("DEBUG texto 154: %p\n", linha->colA);
+  }
+  criaButton(h, &(linha->colA));
+  if (count > 100000) {
+    std::printf("DEBUG texto 156: %p\n", linha->colA);
+    count = 0;
+  }
+  count++;
+  criaButton(h, &(linha->colB));
+  criaButton(h, &(linha->colC));
 }
 
-void criaButton(int h, char* texto) {
+void criaButton(int h, char** texto) {
   ImGui::Spacing();
-  ImGui::Button(&(*texto), ImVec2(ImGui::GetColumnWidth(-1), h));
+  ImGui::Button(*texto, ImVec2(ImGui::GetColumnWidth(-1), h));
   if (ImGui::IsItemClicked() && !ENDGAME) {
-    (*texto) = (&(*player))[0] + '\0';
-    trocaPlayer();
-    fmt::print("DEBUG: {}\n", texto);
+    std::printf("DEBUG texto 161: %p %p %p %p\n", *texto, player, &PLAYER_X,
+                &PLAYER_0);
+    *texto = player;
+    std::printf("DEBUG texto 164: %p %p %p %p\n", *texto, player, &PLAYER_X,
+                &PLAYER_0);
     fmt::print("DEBUG winner: {}\n", (pickWinner()));
-    fmt::print("DEBUG endgame: {}\n", (isEndgame()));
+    fmt::print("DEBUG endgame: {}\n\n", (isEndgame()));
+    trocaPlayer();
   }
+  // ImGui::Button(texto, ImVec2(ImGui::GetColumnWidth(-1), h));
   ImGui::Spacing();
   ImGui::NextColumn();
 }
@@ -177,7 +187,6 @@ void restartButton(int h) {
   // See also IsItemHovered, IsItemActive, etc
   if (ImGui::IsItemClicked()) {
     fmt::print("Restart pressed.\n");
-    fmt::print("DEBUG restartButton: altura h {}\n", h);
     limpaLinha(linha1);
     limpaLinha(linha2);
     limpaLinha(linha3);
@@ -197,12 +206,9 @@ void limpaLinha(EstadoLinha* linha) {
 }
 
 void trocaPlayer() {
-  std::string s = fmt::format(
-      "\n*player {}, player {}, PLAYER_X {}, PLAYER_X {}, PLAYER_0 {}, "
-      "&PLAYER_0 {}\n {} {} \n",
-      *player, static_cast<void*>(player), PLAYER_X,
-      static_cast<void*>(&PLAYER_X), PLAYER_0, static_cast<void*>(&PLAYER_0),
-      &(*player), static_cast<void*>(&(*player)));
-  fmt::print(s);
+  std::printf("DEBUG trocaPlayer 202: %p %c %p %p %p\n", player, *player,
+              &PLAYER_X, &PLAYER_0, &(*player));
   player = *player == PLAYER_X ? &PLAYER_0 : &PLAYER_X;
+  std::printf("DEBUG trocaPlayer 205: %p %c %p %p %p\n", player, *player,
+              &PLAYER_X, &PLAYER_0, &(*player));
 }
