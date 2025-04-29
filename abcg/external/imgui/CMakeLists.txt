@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.21)
 project(imgui)
 
 set(IMGUI_FILES imgui.cpp imgui_demo.cpp imgui_draw.cpp imgui_tables.cpp
-                imgui_widgets.cpp imgui_impl_sdl.cpp)
+                imgui_widgets.cpp imgui_impl_sdl2.cpp)
 
 if(${GRAPHICS_API} MATCHES "OpenGL")
   set(IMGUI_FILES ${IMGUI_FILES} imgui_impl_opengl3.cpp)
@@ -22,7 +22,10 @@ target_include_directories(
   PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 
 if(${CMAKE_SYSTEM_NAME} MATCHES "Emscripten")
-  set_target_properties(${PROJECT_NAME} PROPERTIES COMPILE_FLAGS "-s USE_SDL=2")
+  target_compile_options(
+    ${PROJECT_NAME}
+    PUBLIC "-sUSE_SDL=2"
+    PUBLIC "-w")
 else()
   find_package(SDL2 REQUIRED)
   target_include_directories(${PROJECT_NAME} PRIVATE ${SDL2_INCLUDE_DIR})
