@@ -4,14 +4,13 @@
  *
  * This file is part of ABCg (https://github.com/hbatagelo/abcg).
  *
- * @copyright (c) 2021--2023 Harlen Batagelo. All rights reserved.
+ * @copyright (c) 2021--2022 Harlen Batagelo. All rights reserved.
  * This project is released under the MIT License.
  */
 
 #include "abcgOpenGLError.hpp"
 #include "abcgExternal.hpp"
 #include "abcgOpenGLExternal.hpp"
-#include "abcgUtil.hpp"
 
 #if !defined(NDEBUG) && !defined(__EMSCRIPTEN__) && !defined(__APPLE__)
 /**
@@ -36,14 +35,12 @@ abcg::OpenGLError::prettyPrint(std::string_view what, unsigned int errorCode,
   if (SDL_GL_GetCurrentContext() == nullptr) {
     errorMessage += " (invalid OpenGL context)";
   } else {
-    auto appendGLErrorString{[&errorMessage, &errorCode]() {
-      errorMessage += fmt::format(" ({})", getGLErrorString(errorCode).data());
-    }};
-    appendGLErrorString();
-    //  Clear remaining errors
-    while (glGetError() != GL_NO_ERROR) {
-      appendGLErrorString();
-    }
+    do {
+      errorMessage += " (";
+      errorMessage += getGLErrorString(errorCode).data();
+      errorMessage += ")";
+      // Clear remaining errors
+    } while (glGetError() != GL_NO_ERROR);
   }
   return errorMessage + " in " + sourceLocation.file_name() + ":" +
          std::to_string(sourceLocation.line()) + ", " +
@@ -59,14 +56,12 @@ std::string abcg::OpenGLError::prettyPrint(std::string_view what,
   if (SDL_GL_GetCurrentContext() == nullptr) {
     errorMessage += " (invalid OpenGL context)";
   } else {
-    auto appendGLErrorString{[&errorMessage, &errorCode]() {
-      errorMessage += fmt::format(" ({})", getGLErrorString(errorCode).data());
-    }};
-    appendGLErrorString();
-    //  Clear remaining errors
-    while (glGetError() != GL_NO_ERROR) {
-      appendGLErrorString();
-    }
+    do {
+      errorMessage += " (";
+      errorMessage += getGLErrorString(errorCode).data();
+      errorMessage += ")";
+      // Clear remaining error flags
+    } while (glGetError() != GL_NO_ERROR);
   }
   return errorMessage;
 }

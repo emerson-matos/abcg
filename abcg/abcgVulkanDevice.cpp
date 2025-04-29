@@ -4,7 +4,7 @@
  *
  * This file is part of ABCg (https://github.com/hbatagelo/abcg).
  *
- * @copyright (c) 2021--2023 Harlen Batagelo. All rights reserved.
+ * @copyright (c) 2021--2022 Harlen Batagelo. All rights reserved.
  * This project is released under the MIT License.
  */
 
@@ -14,14 +14,15 @@
 
 #include <set>
 
+#include "abcgException.hpp"
+
 void abcg::VulkanDevice::create(VulkanPhysicalDevice const &physicalDevice,
                                 std::vector<char const *> const &extensions) {
   m_physicalDevice = physicalDevice;
   auto const &queuesFamilies{m_physicalDevice.getQueuesFamilies()};
-  auto const graphicsQueueFamily{queuesFamilies.graphics.value_or(0)};
-  auto const presentQueueFamily{queuesFamilies.present.value_or(0)};
 
-  std::set uniqueQueueFamilies{graphicsQueueFamily, presentQueueFamily};
+  std::set uniqueQueueFamilies{queuesFamilies.graphics.value(),
+                               queuesFamilies.present.value()};
   if (queuesFamilies.compute.has_value()) {
     uniqueQueueFamilies.insert(queuesFamilies.compute.value());
   }
@@ -52,11 +53,11 @@ void abcg::VulkanDevice::create(VulkanPhysicalDevice const &physicalDevice,
                          .ppEnabledExtensionNames = extensions.data(),
                          .pEnabledFeatures = &deviceFeatures});
 
-  // Load device-related entry points directly from the driver
+  // Load device-related entrypoints directly from the driver
   volkLoadDevice(m_device);
 
-  m_queues.graphics = m_device.getQueue(graphicsQueueFamily, 0);
-  m_queues.present = m_device.getQueue(presentQueueFamily, 0);
+  m_queues.graphics = m_device.getQueue(queuesFamilies.graphics.value(), 0);
+  m_queues.present = m_device.getQueue(queuesFamilies.present.value(), 0);
 
   if (queuesFamilies.compute.has_value()) {
     m_queues.compute = m_device.getQueue(queuesFamilies.compute.value(), 0);
@@ -71,42 +72,6 @@ void abcg::VulkanDevice::create(VulkanPhysicalDevice const &physicalDevice,
 void abcg::VulkanDevice::destroy() {
   destroyCommandPools();
   m_device.destroy();
-}
-
-/**
- * @brief Conversion to vk::Device.
- */
-abcg::VulkanDevice::operator vk::Device const &() const noexcept {
-  return m_device;
-}
-
-/**
- * @brief Access to abcg::VulkanPhysicalDevice.
- *
- * @return Instance of vulkan physical device associated with this device.
- */
-abcg::VulkanPhysicalDevice const &
-abcg::VulkanDevice::getPhysicalDevice() const noexcept {
-  return m_physicalDevice;
-}
-
-/**
- * @brief Returns the queues associated with this device.
- *
- * @return Queues structure.
- */
-abcg::VulkanQueues const &abcg::VulkanDevice::getQueues() const noexcept {
-  return m_queues;
-}
-
-/**
- * @brief Returns the command pools associated with this device.
- *
- * @return Command pools structure.
- */
-abcg::VulkanCommandPools const &
-abcg::VulkanDevice::getCommandPools() const noexcept {
-  return m_commandPools;
 }
 
 /**
@@ -168,15 +133,14 @@ void abcg::VulkanDevice::withCommandBuffer(
 
 void abcg::VulkanDevice::createCommandPools() {
   auto const &queuesFamilies{m_physicalDevice.getQueuesFamilies()};
-  auto const graphicsQueueFamily{queuesFamilies.graphics.value_or(0)};
 
   // Always create a command pool for the graphics queue
   m_commandPools.graphics = m_device.createCommandPool(
       {.flags = vk::CommandPoolCreateFlagBits::eTransient,
-       .queueFamilyIndex = graphicsQueueFamily});
+       .queueFamilyIndex = queuesFamilies.graphics.value()});
 
   if (queuesFamilies.compute.has_value()) {
-    if (queuesFamilies.compute.value() == graphicsQueueFamily) {
+    if (queuesFamilies.compute.value() == queuesFamilies.graphics.value()) {
       // Reuse command pool from graphics queue
       m_commandPools.compute = m_commandPools.graphics;
     } else {
@@ -189,7 +153,7 @@ void abcg::VulkanDevice::createCommandPools() {
   }
 
   if (queuesFamilies.transfer.has_value()) {
-    if (queuesFamilies.transfer.value() == graphicsQueueFamily) {
+    if (queuesFamilies.transfer.value() == queuesFamilies.graphics.value()) {
       // Reuse command pool from graphics queue
       m_commandPools.transfer = m_commandPools.graphics;
     } else {

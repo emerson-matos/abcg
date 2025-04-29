@@ -6,13 +6,14 @@
  *
  * This file is part of ABCg (https://github.com/hbatagelo/abcg).
  *
- * @copyright (c) 2021--2023 Harlen Batagelo. All rights reserved.
+ * @copyright (c) 2021--2022 Harlen Batagelo. All rights reserved.
  * This project is released under the MIT License.
  */
 
 #ifndef ABCG_VULKAN_PIPELINE_HPP_
 #define ABCG_VULKAN_PIPELINE_HPP_
 
+#include "abcgVulkanDevice.hpp"
 #include "abcgVulkanShader.hpp"
 #include "abcgVulkanSwapchain.hpp"
 
@@ -53,14 +54,24 @@ public:
               VulkanPipelineCreateInfo const &createInfo);
   void destroy();
 
-  explicit operator vk::Pipeline const &() const noexcept;
+  /**
+   * @brief Conversion to vk::Pipeline.
+   */
+  explicit operator vk::Pipeline const &() const noexcept { return m_pipeline; }
 
-  [[nodiscard]] vk::PipelineLayout const &getLayout() const noexcept;
+  /**
+   * @brief Access to vk::PipelineLayout.
+   *
+   * @return Pipeline layout of the pipeline.
+   */
+  [[nodiscard]] vk::PipelineLayout const &getLayout() const noexcept {
+    return m_pipelineLayout;
+  }
 
 private:
-  vk::Pipeline m_pipeline;
-  vk::PipelineLayout m_pipelineLayout;
-  vk::Device m_device;
+  vk::Pipeline m_pipeline{};
+  vk::PipelineLayout m_pipelineLayout{};
+  vk::Device m_device{};
 };
 
 #endif

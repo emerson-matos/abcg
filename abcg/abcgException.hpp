@@ -6,7 +6,7 @@
  *
  * This file is part of ABCg (https://github.com/hbatagelo/abcg).
  *
- * @copyright (c) 2021--2023 Harlen Batagelo. All rights reserved.
+ * @copyright (c) 2021--2022 Harlen Batagelo. All rights reserved.
  * This project is released under the MIT License.
  */
 
@@ -39,18 +39,47 @@ class Exception;
 class RuntimeError;
 class SDLError;
 class SDLImageError;
+
+// @cond Skipped by Doxygen
+constexpr inline auto codeBoldRed{"\033[1;31m"};
+constexpr inline auto codeBoldYellow{"\033[1;33m"};
+constexpr inline auto codeBoldBlue{"\033[1;34m"};
+constexpr inline auto codeReset{"\033[0m"};
+
+[[maybe_unused]] [[nodiscard]] inline std::string
+toRedString(std::string_view str) {
+  return std::string{codeBoldRed} + str.data() + std::string{codeReset};
+}
+
+[[maybe_unused]] [[nodiscard]] inline std::string
+toYellowString(std::string_view str) {
+  return std::string{codeBoldYellow} + str.data() + std::string{codeReset};
+}
+
+[[maybe_unused]] [[nodiscard]] inline std::string
+toBlueString(std::string_view str) {
+  return std::string{codeBoldBlue} + str.data() + std::string{codeReset};
+}
+// @endcond
 } // namespace abcg
 
 /**
  * @brief Base class for ABCg exception objects.
  *
- * Base exception class used for exception objects thrown by ABCg.
+ * This is the base exception class used for exception objects thrown by ABCg.
  */
 class abcg::Exception : public std::exception {
 public:
   explicit Exception(std::string_view what);
 
-  [[nodiscard]] char const *what() const noexcept override;
+  /**
+   * @brief Returns the explanatory string.
+   *
+   * @return Pointer to a null-terminated string with explanatory information.
+   */
+  [[nodiscard]] const char *what() const noexcept override {
+    return m_what.data();
+  };
 
 private:
   std::string m_what{};
@@ -72,14 +101,14 @@ public:
       source_location const &sourceLocation = source_location::current());
 
 private:
-  static std::string prettyPrint(std::string_view what,
-                                 source_location const &sourceLocation);
+  [[nodiscard]] static std::string
+  prettyPrint(std::string_view what, source_location const &sourceLocation);
 #else
 public:
   explicit RuntimeError(std::string_view what);
 
 private:
-  static std::string prettyPrint(std::string_view what);
+  [[nodiscard]] static std::string prettyPrint(std::string_view what);
 #endif
 };
 
@@ -100,14 +129,14 @@ public:
       source_location const &sourceLocation = source_location::current());
 
 private:
-  static std::string prettyPrint(std::string_view what,
-                                 source_location const &sourceLocation);
+  [[nodiscard]] static std::string
+  prettyPrint(std::string_view what, source_location const &sourceLocation);
 #else
 public:
   explicit SDLError(std::string_view what);
 
 private:
-  static std::string prettyPrint(std::string_view what);
+  [[nodiscard]] static std::string prettyPrint(std::string_view what);
 #endif
 };
 
@@ -128,14 +157,14 @@ public:
       source_location const &sourceLocation = source_location::current());
 
 private:
-  static std::string prettyPrint(std::string_view what,
-                                 source_location const &sourceLocation);
+  [[nodiscard]] static std::string
+  prettyPrint(std::string_view what, source_location const &sourceLocation);
 #else
 public:
   explicit SDLImageError(std::string_view what);
 
 private:
-  static std::string prettyPrint(std::string_view what);
+  [[nodiscard]] static std::string prettyPrint(std::string_view what);
 #endif
 };
 

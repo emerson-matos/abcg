@@ -6,7 +6,7 @@
  *
  * This file is part of ABCg (https://github.com/hbatagelo/abcg).
  *
- * @copyright (c) 2021--2023 Harlen Batagelo. All rights reserved.
+ * @copyright (c) 2021--2022 Harlen Batagelo. All rights reserved.
  * This project is released under the MIT License.
  */
 
@@ -46,9 +46,20 @@ public:
   void loadData(gsl::not_null<void const *> data, vk::DeviceSize size,
                 vk::DeviceSize offset = 0UL);
 
-  explicit operator vk::Buffer const &() const noexcept;
+  /**
+   * @brief Conversion to vk::Buffer.
+   */
+  explicit operator vk::Buffer const &() const noexcept { return m_buffer; }
 
-  [[nodiscard]] vk::DeviceMemory const &getDeviceMemory() const noexcept;
+  /**
+   * @brief Returns the opaque handle to the device memory object associated
+   * with the buffer.
+   *
+   * @return Device memory object.
+   */
+  [[nodiscard]] vk::DeviceMemory const &getDeviceMemory() const noexcept {
+    return m_deviceMemory;
+  }
 
 private:
   [[nodiscard]] std::pair<vk::Buffer, vk::DeviceMemory>
@@ -56,9 +67,9 @@ private:
                vk::BufferUsageFlags usage,
                vk::MemoryPropertyFlags properties) const;
 
-  vk::Buffer m_buffer;
-  vk::DeviceMemory m_deviceMemory;
-  vk::Device m_device;
+  vk::Buffer m_buffer{};
+  vk::DeviceMemory m_deviceMemory{};
+  vk::Device m_device{};
 };
 
 #endif

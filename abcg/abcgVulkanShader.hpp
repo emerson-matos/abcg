@@ -4,7 +4,7 @@
  *
  * This file is part of ABCg (https://github.com/hbatagelo/abcg).
  *
- * @copyright (c) 2021--2023 Harlen Batagelo. All rights reserved.
+ * @copyright (c) 2021--2022 Harlen Batagelo. All rights reserved.
  * This project is released under the MIT License.
  */
 
@@ -29,13 +29,28 @@ public:
   void create(VulkanDevice const &device, ShaderSource const &pathOrSource);
   void destroy();
 
-  [[nodiscard]] vk::ShaderStageFlagBits const &getStage() const noexcept;
-  [[nodiscard]] vk::ShaderModule const &getModule() const noexcept;
+  /**
+   * @brief Returns the shader stage bitmask.
+   *
+   * @return Shader stage bitmask.
+   */
+  [[nodiscard]] vk::ShaderStageFlagBits const &getStage() const noexcept {
+    return m_stage;
+  }
+
+  /**
+   * @brief Returns the opaque handle to the shader module object.
+   *
+   * @return Shader module.
+   */
+  [[nodiscard]] vk::ShaderModule const &getModule() const noexcept {
+    return m_module;
+  }
 
 private:
   vk::ShaderStageFlagBits m_stage{};
-  vk::ShaderModule m_module;
-  vk::Device m_device;
+  vk::ShaderModule m_module{};
+  vk::Device m_device{};
 };
 
 #endif

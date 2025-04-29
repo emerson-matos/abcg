@@ -4,7 +4,7 @@
  *
  * This file is part of ABCg (https://github.com/hbatagelo/abcg).
  *
- * @copyright (c) 2021--2023 Harlen Batagelo. All rights reserved.
+ * @copyright (c) 2021--2022 Harlen Batagelo. All rights reserved.
  * This project is released under the MIT License.
  */
 
@@ -12,7 +12,6 @@
 #define ABCG_UTIL_HPP_
 
 #include <functional>
-#include <string>
 
 namespace abcg {
 
@@ -68,10 +67,6 @@ std::size_t hashCombine(const TFirst &value, const TRest &...rest) {
   hashCombineSeed(seed, value, rest...);
   return seed;
 }
-
-std::string toRedString(std::string_view str);
-std::string toYellowString(std::string_view str);
-std::string toBlueString(std::string_view str);
 
 } // namespace abcg
 

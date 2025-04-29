@@ -6,7 +6,7 @@
  *
  * This file is part of ABCg (https://github.com/hbatagelo/abcg).
  *
- * @copyright (c) 2021--2023 Harlen Batagelo. All rights reserved.
+ * @copyright (c) 2021--2022 Harlen Batagelo. All rights reserved.
  * This project is released under the MIT License.
  */
 
@@ -58,18 +58,19 @@ public:
       source_location const &sourceLocation = source_location::current());
 
 private:
-  static std::string prettyPrint(VkResult errorCode,
-                                 source_location const &sourceLocation);
+  [[nodiscard]] static std::string
+  prettyPrint(VkResult errorCode, source_location const &sourceLocation);
 #else
 public:
   explicit VulkanError(VkResult errorCode);
   explicit VulkanError(vk::Result errorCode);
 
 private:
-  static std::string prettyPrint(VkResult errorCode);
+  [[nodiscard]] static std::string prettyPrint(VkResult errorCode);
 #endif
 
-  static std::string_view getVulkanErrorString(VkResult errorCode);
+  [[nodiscard]] static std::string_view
+  getVulkanErrorString(VkResult errorCode);
 };
 
 #endif
